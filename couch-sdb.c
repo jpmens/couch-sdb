@@ -75,6 +75,9 @@ couch_create(const char *zone, int argc, char **argv, void *driverdata, void **d
 	if ((jpi->dbname = isc_mem_strdup(ns_g_mctx, argv[1])) == NULL) 
 		return (ISC_R_NOMEMORY);
 		
+	/*
+	 * Connect to CouchDB and select the database to use.
+	 */
 	if ((jpi->cd = cdbc_new(jpi->uri)) == NULL) {
 		fprintf(stderr, "Can't init CDBC\n");
 	}
@@ -119,14 +122,16 @@ to_sdb(dns_sdblookup_t *l, const char *type, int ttl, const char *name, int *cou
 	} else {
 		res = dns_sdb_putrr(l, type, ttl, outdata);
 	}
-	if (res != ISC_R_SUCCESS) {
+
+	if (res == ISC_R_SUCCESS) {
+		printf("--> %2d %s %s\n", ++*count, type, name);
+	}
+	else {
 		isc_log_iwrite(dns_lctx,
 			DNS_LOGCATEGORY_DATABASE,
 			DNS_LOGMODULE_SDB, ISC_LOG_ERROR,
 			isc_msgcat, ISC_MSGSET_GENERAL,
 			ISC_MSG_FAILED, "dns_sdb_putrr");
-	} else {
-		printf("--> %2d %s %s\n", ++*count, type, name);
 	}
 	return (res);
 
@@ -201,7 +206,10 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 			}
 		}
 
-		// return (ISC_R_SUCCESS);
+		/*
+		 * Fall through to find other records which may belong to
+		 * the zone apex.
+		 */
 	}
 
 	/* Other RR */
@@ -248,7 +256,6 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 		}
 	}
 
-	printf("COUNT == %d\n", count);
 	return (count > 0) ? ISC_R_SUCCESS : ISC_R_NOTFOUND;
 }
 
