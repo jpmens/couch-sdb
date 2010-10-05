@@ -137,7 +137,7 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 	isc_result_t res;
 	struct jpinfo *jpi = dbdata;
 	char *mname = NULL;
-	int rev = -1, serial = -1,  ttl, count = 0;
+	int rev = -1, serial = -1,  ttl, default_ttl = DEFAULT_TTL, count = 0;
 	unsigned int n;
 	json_t *doc, *soa, *o, *ns, *rr;
 
@@ -146,6 +146,9 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 	if ((doc = cdbc_get_js(jpi->cd, zone)) == NULL) {
 		return (ISC_R_NOTFOUND);
 	}
+
+	if ((o = json_object_get(doc, "default_ttl")) != NULL)
+		default_ttl = json_integer_value(o);
 
 	if (strcmp(name, "@") == 0) {
 	
@@ -198,7 +201,7 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 			}
 		}
 
-		return (ISC_R_SUCCESS);
+		// return (ISC_R_SUCCESS);
 	}
 
 	/* Other RR */
@@ -215,7 +218,7 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 			type = json_object_get(o, "type");
 			ttl_j = json_object_get(o, "ttl");
 
-			ttl = (ttl_j) ? json_integer_value(ttl_j) : DEFAULT_TTL;
+			ttl = (ttl_j) ? json_integer_value(ttl_j) : default_ttl;
 
 			/* Ignore unwanted names */
 			if (strcasecmp(name, json_string_value(domain)) != 0)
