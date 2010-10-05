@@ -1,0 +1,77 @@
+{
+   "_id": "foo.bar",
+   "type": "zone",
+   "zone": "foo.bar",
+   "default_ttl": 1800,
+   "soa": {
+       "mname": "jpx.foo.bar.",
+       "serial": 69
+   },
+   "ns": [
+       "ns1.foo.",
+       "ns2.foo.",
+       "ns3.foo."
+   ],
+   "rr": [
+       {
+           "name": "www",
+           "type": "A",
+           "data": [
+               "192.168.1.1",
+               "10.0.0.1"
+           ],
+           "ttl": 62
+       },
+       {
+           "name": "www1",
+           "type": "txt",
+           "ttl": 60,
+           "data": [
+               "text record",
+               "this is a"
+           ]
+       },
+       {
+           "name": "@",
+           "type": "mx",
+           "data": "10 mail.example.net",
+           "ttl": 600
+       },
+       {
+           "name": "@",
+           "type": "mx",
+           "data": [
+               "15 mail",
+               "16 mail2",
+               "17 mail3.foo"
+           ],
+           "ttl": 600
+       },
+       {
+           "name": "@",
+           "type": "a",
+           "data": [
+               "127.0.0.2"
+           ]
+       },
+       {
+           "name": "@",
+           "type": "txt",
+           "data": [
+               "Relax",
+               "CouchDB and Bind SDB",
+               "powered by"
+           ]
+       },
+       {
+           "name": "ldap",
+           "type": "cname",
+           "data": "www.foo.bar"
+       },
+       {
+           "name": "hot",
+           "type": "dname",
+           "data": "temp.aa"
+       }
+   ]
+}
