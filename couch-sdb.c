@@ -148,7 +148,7 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 
 	printf("************ couch_lookup (%s, %s)\n", zone, name);
 
-	if ((doc = cdbc_get_js(jpi->cd, zone)) == NULL) {
+	if ((doc = cdbc_get_js(jpi->cd, (char *)zone)) == NULL) {
 		return (ISC_R_NOTFOUND);
 	}
 
@@ -259,11 +259,88 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 	return (count > 0) ? ISC_R_SUCCESS : ISC_R_NOTFOUND;
 }
 
+static int axfr_func(CDBC *cd, json_t *rowobj, void *data)
+{
+	dns_sdballnodes_t *an = (dns_sdballnodes_t *)data;
+	isc_result_t res;
+        char *name, *type, *rdata, *outdata, buf[1024];
+	int ttl;
+	json_t *v, *o;
+
+	UNUSED(cd);
+
+	/*
+	 * If an error occurs hereabouts, return 1 to tell the
+	 * cdbc-walker to quit.
+	 */
+
+        if ((v = json_object_get(rowobj, "value")) == NULL)
+		return 1;
+
+        if ((o = json_object_get(v, "type")) == NULL)
+		return 1;
+        type = json_string_value(o);
+
+	/* Ignore SOA; SDB has already "pushed" that */
+	if (strcasecmp(type, "SOA") == 0)
+		return 0;
+
+        if ((o = json_object_get(v, "name")) == NULL)
+		return 1;
+
+        name = json_string_value(o);
+
+        if ((o = json_object_get(v, "ttl")) == NULL)
+		return 1;
+        ttl = json_integer_value(o);
+
+        if ((o = json_object_get(v, "data")) == NULL)
+		return 1;
+        rdata = json_string_value(o);
+
+	outdata = fixrdata(type, rdata);
+
+	if (strcasecmp(type, "TXT") == 0) {
+		sprintf(buf, "\"%s\"", outdata);
+		outdata = buf;
+	}
+	res = dns_sdb_putnamedrr(an, name, type, ttl, outdata);
+	if (res != ISC_R_SUCCESS) {
+		isc_log_iwrite(dns_lctx,
+			DNS_LOGCATEGORY_DATABASE,
+			DNS_LOGMODULE_SDB, ISC_LOG_ERROR,
+			isc_msgcat, ISC_MSGSET_GENERAL,
+			ISC_MSG_FAILED, "dns_sdbputnamedrr");
+		return 1;
+	}
+
+	return 0;
+}
+
+static isc_result_t
+couch_allnodes(const char *zone, void *dbdata, dns_sdballnodes_t *an)
+{
+	struct jpinfo *jpi = dbdata;
+	int rc;
+	char key[1024];
+
+
+	printf("***************** couch_allnodes: %s\n", zone);
+
+	sprintf(key, "key=\"%s\"", zone);
+	rc = cdbc_view_walk(jpi->cd, axfr_func, an, "dns", "axfr",
+                key,
+                "include_docs=false",
+                NULL);
+
+	return (rc == CDBC_OK ? ISC_R_SUCCESS : ISC_R_FAILURE);
+
+}
 
 static dns_sdbmethods_t	couch_methods = {
 	couch_lookup,		// lookup
 	NULL,			// authority
-	NULL,			// allnodes
+	couch_allnodes,		// allnodes
 	couch_create,		// create
 	couch_destroy		// destroy
 };
