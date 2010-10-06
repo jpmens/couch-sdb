@@ -141,7 +141,7 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 {
 	isc_result_t res;
 	struct jpinfo *jpi = dbdata;
-	char *mname = NULL;
+	char *mname = "ns1", *rname = "hostmaster";
 	int rev = -1, serial = -1,  ttl, default_ttl = DEFAULT_TTL, count = 0;
 	unsigned int n;
 	json_t *doc, *soa, *o, *ns, *rr;
@@ -170,7 +170,10 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 		rev = atoi(json_string_value(o));
 	
 		if ((o = json_object_get(soa, "mname"))) {
-			mname = strdup(json_string_value(o));
+			mname = json_string_value(o);
+		} 
+		if ((o = json_object_get(soa, "rname"))) {
+			rname = json_string_value(o);
 		}
 	
 		if ((o = json_object_get(soa, "serial"))) {
@@ -180,7 +183,7 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 			serial = rev;
 		}
 	
-		res = dns_sdb_putsoa(l, "hello", (mname) ? mname : "nobody.here.", serial);
+		res = dns_sdb_putsoa(l, mname, rname, serial);
 		if (res != ISC_R_SUCCESS) {
 			isc_log_iwrite(dns_lctx,
 				DNS_LOGCATEGORY_DATABASE,
@@ -189,9 +192,6 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 				ISC_MSG_FAILED, "dns_sdb_putsoa");
 			return (ISC_R_FAILURE);
 		}
-		if (mname)
-			free(mname);
-		
 	
 		/* NS RR */
 	
@@ -199,7 +199,7 @@ couch_lookup(const char *zone, const char *name, void *dbdata, dns_sdblookup_t *
 			for (n = 0; n < json_array_size(ns); n++) {
 				o = json_array_get(ns, n);
 				printf("NS  %s\n", json_string_value(o));
-				res = to_sdb(l, "NS", 86400, json_string_value(o), &count);
+				res = to_sdb(l, "NS", default_ttl, json_string_value(o), &count);
 				if (res != ISC_R_SUCCESS) {
 					return (ISC_R_FAILURE);
 				}
