@@ -1,11 +1,13 @@
 {
    "_id": "foo.bar",
+   "_rev": "5-5629159584efcd2e63ab651aff9d19df",
    "type": "zone",
    "zone": "foo.bar",
    "default_ttl": 1800,
    "soa": {
-       "mname": "jpx.foo.bar.",
-       "serial": 69
+       "mname": "dns.example.org",
+       "rname": "hostmaster.example.org.",
+       "xserial": 69
    },
    "ns": [
        "ns1.foo.",
