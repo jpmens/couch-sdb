@@ -17,7 +17,7 @@ The CouchDB portion doesn't use a view in any way. It's either the document for 
 Data in a CouchDB is [JSON](http://www.json.org/). If you didn't know that, you shouldn't be here. A zone is one document. (Look at [zone.json](couch-sdb/blob/master/zone.json) while we speak.)
 
 * The document's `_id` is the zone name.
-* If a `serial` value exists in the `soa` object, it must be an integer, which is used as the SOA serial. If it doesn't exist, the first integer value of the document's `_rev` is used; now *that is way cool!* -- auto-incrementing serial!
+* If a `serial` value exists in the `soa` object, it must be an integer, which is used as the SOA serial. If it doesn't exist, the first integer value of the document's `_rev` is used; now **that is way cool!** -- auto-incrementing serial!
 * `mname` and `rname` are used, else hard-coded values.
 * `ns` is an array of name servers. Names, of course; *not* addresses!
 * `default_ttl` is just that; it is used for the NS RR and for records that don't have their own TTL.
