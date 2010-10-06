@@ -27,6 +27,9 @@ Data in a CouchDB is [JSON](http://www.json.org/). If you didn't know that, you 
   * `data` is the _rdata_ for the domain. It is either a single value or an array of similar values, in which case an RRset is built.
   * An optional `ttl` for this RRset.
 
+## Zone Transfers (AXFR)
+
+Yep, we do that too. The `couch_allnodes`() function does that with a view walker (sorry, this is loose terminology of CDBC). It uses a view called `axfr` in the `dns` couchapp in the same database. The view does the hard work of producing the resource records to be included in the zone transfer.
 
 ## Requirements
 
@@ -68,6 +71,7 @@ Data in a CouchDB is [JSON](http://www.json.org/). If you didn't know that, you 
 		                |           | 	                  + dbname
 		               	|           +---------------------- URL
 		               	+---------------------------------- keyword
+		    allow-transfer { 127.0.0.1; };
 		};
 
 2. Launch `named` in foreground
