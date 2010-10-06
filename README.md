@@ -12,6 +12,21 @@ Yes, it does. A bit. Speed isn't bad at all. Due to limitations of the Bind SDB 
 
 The CouchDB portion doesn't use a view in any way. It's either the document for the zone is there, or it ain't. My first version queried a view to find the requested domain name, but I was getting an unecessary number of hits on the database per query, so I scrapped that.
 
+## The data
+
+Data in a CouchDB is [JSON](http://www.json.org/). If you didn't know that, you shouldn't be here. A zone is one document. (Look at [zone.json](zone.json) while we speak.)
+
+* The document's `_id` is the zone name.
+* If a `serial` value exists in the `soa` object, it must be an integer, which is used as the SOA serial. If it doesn't exist, the first integer value of the document's `_rev` is used; now *that is way cool!* -- auto-incrementing serial!
+* `mname` and `rname` are used, else hard-coded values.
+* `ns` is an array of name servers. Names, of course; *not* addresses!
+* `default_ttl` is just that; it is used for the NS RR and for records that don't have their own TTL.
+* `rr` is an array of RR objects. Each of these have:
+  * A domain `name`, which must be unqualified. (I.e. use `www` only.) Use `@` for the zone apex.
+  * A `type`. Upper or lower case.
+  * `data` is the _rdata_ for the domain. It is either a single value or an array of similar values, in which case an RRset is built.
+  * An optional `ttl` for this RRset.
+
 
 ## Requirements
 
