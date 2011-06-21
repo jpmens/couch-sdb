@@ -4,7 +4,7 @@ This is an SDB back-end to the venerable [BIND](http://www.isc.org/software/bind
 
 ## Why?
 
-Because it's cool. Because CouchDB replicates over port 80, whereas zone transfers (AXFR) use port 53. Because CouchDB is proxyable. Because it is fast enough for moderate use. And mainly, because I felt like doing it ever since I created a proof of concept [using a pipe back-end to PowerDNS](http://blog.fupps.com/2010/05/05/powerdns-and-a-couchdb-backend/).
+Because it's cool. Because CouchDB replicates over port 80, whereas zone transfers (AXFR) use port 53. Because CouchDB is proxyable. Because it is fast enough for moderate use. And mainly, because I felt like doing it ever since I created a proof of concept [using a pipe back-end to PowerDNS](http://jpmens.net/2010/05/05/powerdns-and-a-couchdb-backend/).
 
 ## Does it... ?
 
